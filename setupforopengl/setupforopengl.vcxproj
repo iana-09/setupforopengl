@@ -147,9 +147,37 @@
     <Library Include="dependencies\lib\glfw3.lib" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="bestscores\0.png" />
+    <Image Include="bestscores\1.png" />
+    <Image Include="bestscores\2.png" />
+    <Image Include="bestscores\3.png" />
+    <Image Include="bestscores\4.png" />
+    <Image Include="bestscores\5.png" />
+    <Image Include="bestscores\6.png" />
+    <Image Include="bestscores\7.png" />
+    <Image Include="bestscores\8.png" />
+    <Image Include="bestscores\9.png" />
+    <Image Include="bunny sequence\bunny died.png" />
+    <Image Include="bunny sequence\bunny_sequence 1.png" />
+    <Image Include="bunny sequence\bunny_sequence 2.png" />
     <Image Include="buttons\EXIT button.png" />
     <Image Include="buttons\RESET button.png" />
     <Image Include="buttons\START button.png" />
+    <Image Include="clouds\cloud1.png" />
+    <Image Include="clouds\cloud2.png" />
+    <Image Include="numbers\0.png" />
+    <Image Include="numbers\1.png" />
+    <Image Include="numbers\2.png" />
+    <Image Include="numbers\3.png" />
+    <Image Include="numbers\4.png" />
+    <Image Include="numbers\5.png" />
+    <Image Include="numbers\6.png" />
+    <Image Include="numbers\7.png" />
+    <Image Include="numbers\8.png" />
+    <Image Include="numbers\9.png" />
+    <Image Include="text\best score.png" />
+    <Image Include="text\game over.png" />
+    <Image Include="text\game title.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

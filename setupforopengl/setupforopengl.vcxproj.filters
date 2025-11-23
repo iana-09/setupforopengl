@@ -52,5 +52,89 @@
     <Image Include="buttons\START button.png">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="bunny sequence\bunny died.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="bunny sequence\bunny_sequence 1.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="bunny sequence\bunny_sequence 2.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="clouds\cloud1.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="clouds\cloud2.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="numbers\0.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="numbers\1.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="numbers\2.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="numbers\3.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="numbers\4.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="numbers\5.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="numbers\6.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="numbers\7.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="numbers\8.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="numbers\9.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="text\best score.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="text\game over.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="text\game title.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="bestscores\0.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="bestscores\1.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="bestscores\2.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="bestscores\3.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="bestscores\4.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="bestscores\5.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="bestscores\6.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="bestscores\7.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="bestscores\9.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="bestscores\8.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>
