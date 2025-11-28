@@ -104,12 +104,12 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\anie\source\repos\ewan ko rin\setupforopengl\setupforopengl\dependencies\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Sebastian Penaranda\Desktop\Game proj\setupforopengl\setupforopengl\dependencies\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Users\anie\source\repos\ewan ko rin\setupforopengl\setupforopengl\dependencies\lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Users\Sebastian Penaranda\Desktop\Game proj\setupforopengl\setupforopengl\dependencies\lib</AdditionalLibraryDirectories>
       <AdditionalDependencies>glfw3.lib;opengl32.lib;user32.lib;gdi32.lib;shell32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>

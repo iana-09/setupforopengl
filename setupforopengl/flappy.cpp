@@ -1,6 +1,6 @@
 ﻿// flappy_gl.cpp
-// Hop Hop Bunny - Manual hopping version (fixed physics, gap=0.50, hop=0.46)
-// Full UI + button positioning fixes (Exit below Start, visible before start)
+// Hop Hop Bunny - Final Polish
+// Fixed: "Best Score" text is now responsive (scales with screen) and much larger.
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -158,33 +158,15 @@ int main() {
 
     // Buttons & textures
     UIButton startBtn, resetBtn, exitBtn;
+
+    // Original Dimensions
     const float BTN_W = 940.0f, BTN_H = 788.0f;
-    // scale so button fits nicely on 720p
-    float btnScale = (WIN_H * 0.28f) / BTN_H; // smaller than earlier so fits
-    float buttonGap = 18.0f; // pixels between buttons (visual gap)
-    startBtn.w = resetBtn.w = exitBtn.w = BTN_W * btnScale;
-    startBtn.h = resetBtn.h = exitBtn.h = BTN_H * btnScale;
 
-    // Start - center
-    startBtn.x = WIN_W * 0.5f;
-    // place start a bit above center to match your screenshot
-    startBtn.y = WIN_H * 0.38f + startBtn.h * 0.25f;
     startBtn.visible = true;
-
-    // Exit - directly below Start (pixel-perfect)
-    // Since pixel coordinate origin for UI positions in drawTexPixel expects y from top
-    // We will use the same coordinate space (0..WIN_H), drawTexPixel maps them appropriately.
-    float exitGap = startBtn.h * 0.65f; // large enough vertical offset to match visual spacing
-    exitBtn.x = WIN_W * 0.5f;
-    exitBtn.y = startBtn.y + exitGap; // below start in pixel coords
     exitBtn.visible = true;
-
-    // Reset stays centered (hidden until game over)
-    resetBtn.x = WIN_W * 0.5f;
-    resetBtn.y = WIN_H * 0.5f;
     resetBtn.visible = false;
 
-    // Load textures (paths must exist in your project)
+    // Load textures
     startBtn.tex = loadTex("buttons/START button.png");
     resetBtn.tex = loadTex("buttons/RESET button.png");
     exitBtn.tex = loadTex("buttons/EXIT button.png");
@@ -196,6 +178,8 @@ int main() {
 
     GLuint cloudTex1 = loadTex("clouds/cloud1.png");
     GLuint cloudTex2 = loadTex("clouds/cloud2.png");
+
+    GLuint grassTex = loadTex("ground/grass.png");
 
     GLuint numberTex[10];
     for (int i = 0; i < 10; i++) {
@@ -222,7 +206,7 @@ int main() {
     const float cloudSpeed = pipeSpeed * WIN_W * 0.5f;
     float timeSinceSpawn = 0.0f;
     int score = 0;
-    int bestScore = 0; // track the best score
+    int bestScore = 0;
     bool gameStarted = false, gameOver = false;
     float bunnyAnimTimer = 0.0f; const float bunnyAnimDuration = 0.2f;
     int bunnyFrame = 0;
@@ -240,12 +224,9 @@ int main() {
     glEnable(GL_BLEND); glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     auto pixelToNDC = [&](float px, float py, int fbw, int fbh) {
-        // px,py are pixel coords where (0,0) is top-left
-        // convert to NDC centered coords in [-1,1] (note vertical flip)
         return std::pair<float, float>((px / fbw) * 2.0f - 1.0f, 1.0f - (py / fbh) * 2.0f);
         };
 
-    // draw textured quad in pixel space (requires current fb size)
     auto drawTexPixel = [&](GLuint tex, float cx, float cy, float w, float h, int fbw, int fbh, float alpha = 1.0f) {
         if (!tex) return;
         glBindTexture(GL_TEXTURE_2D, tex);
@@ -266,7 +247,7 @@ int main() {
         if (b.visible && b.tex) drawTexPixel(b.tex, b.x, b.y, b.w, b.h, fbw, fbh);
         };
 
-    // CLOUDS (pixels) with size variation
+    // CLOUDS 
     std::vector<Cloud> clouds;
     struct CloudParams { float xMul, yMul, wScale, hScale; };
     CloudParams cloudParams[] = {
@@ -278,7 +259,6 @@ int main() {
 
     GLuint cloudTexs[] = { cloudTex1, cloudTex2, cloudTex1, cloudTex2 };
 
-    // Initialize clouds
     clouds.clear();
     for (int i = 0; i < 4; i++) {
         if (cloudTexs[i]) {
@@ -295,7 +275,6 @@ int main() {
         birdY = 0.0f; pipes.clear(); timeSinceSpawn = 0; score = 0;
         gameStarted = true; gameOver = false; firstFlapDone = false;
         startBtn.visible = false; resetBtn.visible = false;
-        // hide exit while playing
         exitBtn.visible = false;
         char buf[128]; snprintf(buf, sizeof(buf), "Bunny Hop Adventure - Score: %d", score); glfwSetWindowTitle(win, buf);
         };
@@ -303,7 +282,6 @@ int main() {
         birdY = 0.0f; pipes.clear(); timeSinceSpawn = 0; score = 0;
         gameStarted = false; gameOver = false; firstFlapDone = false;
         startBtn.visible = true; exitBtn.visible = true; resetBtn.visible = false;
-        // keep bestScore intact
         char buf[128];
         snprintf(buf, sizeof(buf), "Bunny Hop Adventure - Best: %d", bestScore);
         glfwSetWindowTitle(win, buf);
@@ -311,21 +289,17 @@ int main() {
     exitBtn.onClick = [&]() { glfwSetWindowShouldClose(win, 1); };
 
     auto now = Clock::now(); auto last = now;
-    auto startTime = Clock::now(); // used for animations
+    auto startTime = Clock::now();
 
-    // Tuned values
     const float pipeWidth = 0.12f;
     const float pipeGapSize = 0.50f;
     const float flapStrength = 0.60f;
     const float gravity = -2.30f;
-
-    // bird velocity state
     float birdVel = 0.0f;
 
-    // seed
     srand((unsigned int)time(nullptr));
 
-    // drawScore
+    // drawScore - UPDATED TO BE RESPONSIVE
     std::function<void(int, int, int, bool)> drawScore;
     drawScore = [&](int scoreVal, int fbw, int fbh, bool isGameOver)
         {
@@ -350,7 +324,7 @@ int main() {
                     drawTexPixel(numberTex[digits[i]], x + i * numW, y, numW, numH, fbw, fbh);
             }
 
-            // game title (before start only)
+            // game title
             if (!gameStarted && !isGameOver) {
                 float bob = sinf(elapsed * 2.0f) * 6.0f;
                 float scale = 0.92f + 0.06f * sinf(elapsed * 1.8f);
@@ -371,7 +345,7 @@ int main() {
                 drawTexPixel(textGameOver, goX, goY, goW, goH, fbw, fbh, 1.0f);
             }
 
-            // best score (game over only)
+            // best score (game over only) -- FIXED SIZE
             if (isGameOver)
             {
                 std::vector<int> bestDigits;
@@ -382,12 +356,23 @@ int main() {
                     std::reverse(bestDigits.begin(), bestDigits.end());
                 }
 
-                float labelW = 300.0f, labelH = 100.0f;
-                float digitW = 110.0f, digitH = 88.0f;
+                // Calculate scale based on current window height
+                // 720.0f is our reference height. If window is 1440p, text doubles in size.
+                float uiScale = fbh / 720.0f;
+
+                // Base dimensions increased and multiplied by scale
+                float labelW = 550.0f * uiScale;
+                float labelH = 180.0f * uiScale;
+                float digitW = 140.0f * uiScale;
+                float digitH = 110.0f * uiScale;
+
+                // Overall size multiplier if needed
+
+                float spacing = 20.0f * uiScale;
+
                 float numbersWidth = digitW * bestDigits.size();
-                float spacing = 28.0f;
                 float totalWidth = labelW + spacing + numbersWidth;
-                float centerY = fbh * 0.40f;
+                float centerY = fbh * 0.40f; // Positioned between Game Over and Reset
                 float labelX = (fbw - totalWidth) * 0.5f + labelW * 0.5f;
                 float numbersStartX = labelX + labelW * 0.5f + spacing + digitW * 0.5f;
 
@@ -407,24 +392,33 @@ int main() {
         last = now;
 
         int fbw, fbh; glfwGetFramebufferSize(win, &fbw, &fbh);
+
+        // --- RESPONSIVE UI UPDATE ---
+        float btnScale = (fbh * 0.28f) / BTN_H;
+
+        startBtn.w = resetBtn.w = exitBtn.w = BTN_W * btnScale;
+        startBtn.h = resetBtn.h = exitBtn.h = BTN_H * btnScale;
+
+        startBtn.x = fbw * 0.5f;
+        startBtn.y = fbh * 0.38f + startBtn.h * 0.25f;
+
+        float exitGap = startBtn.h * 0.65f;
+        exitBtn.x = fbw * 0.5f;
+        exitBtn.y = startBtn.y + exitGap;
+
+        resetBtn.x = fbw * 0.5f;
+        resetBtn.y = fbh * 0.5f;
+        // -----------------------------
+
         glfwPollEvents();
 
         if (clickFlag) { glfwGetCursorPos(win, &mouseX, &mouseY); mouseJustPressed = true; clickFlag = false; }
 
-        // convert mouseY from top-left origin (GLFW) to same coordinate system drawTexPixel uses:
-        // drawTexPixel expects (0,0) top-left; glfwGetCursorPos returns (0,0) top-left already,
-        // but many computations elsewhere assume same. Ensure consistent: we won't invert here.
-        // However earlier code used fbh - mouseY in some places; to be safe for hit testing we use same
-        // coordinate: mouseY (GLFW) has origin at top, drawTexPixel expects top origin too, so keep as-is.
-
-        // INPUT
         static bool spacePrev = false;
         bool spaceNow = (glfwGetKey(win, GLFW_KEY_SPACE) == GLFW_PRESS);
 
         // Mouse click hop or button clicks
         if (mouseJustPressed) {
-            // cursor is in pixel coords (mouseX, mouseY) with origin at top-left (0..fbw, 0..fbh)
-            // Test UI button hitboxes (they use center origin so we check using x +/- w/2 and y +/- h/2)
             if (startBtn.visible &&
                 (mouseX >= startBtn.x - startBtn.w / 2 && mouseX <= startBtn.x + startBtn.w / 2 &&
                     mouseY >= startBtn.y - startBtn.h / 2 && mouseY <= startBtn.y + startBtn.h / 2)) {
@@ -447,26 +441,22 @@ int main() {
             mouseJustPressed = false;
         }
 
-        // Space hop
         if (gameStarted && !gameOver && spaceNow && !spacePrev) {
             birdVel = +flapStrength;
             firstFlapDone = true;
         }
         spacePrev = spaceNow;
 
-        // Apply gravity only after first flap (manual hop)
         if (gameStarted && firstFlapDone) {
             birdVel += gravity * dt;
             birdY += birdVel * dt;
         }
 
-        // Stop rising above top
         if (birdY + birdRadius > 1.0f) {
             birdY = 1.0f - birdRadius;
             birdVel = 0;
         }
 
-        // ground collision
         if (birdY - birdRadius < -1.0f) {
             birdY = -1.0f + birdRadius;
             gameOver = true;
@@ -474,7 +464,6 @@ int main() {
             exitBtn.visible = true;
         }
 
-        // when not started, freeze bird and ensure UI state
         if (!gameStarted) {
             birdY = 0.0f;
             birdVel = 0.0f;
@@ -483,13 +472,12 @@ int main() {
             resetBtn.visible = false;
         }
 
-        // SPAWN PIPES
         if (gameStarted && !gameOver) {
             timeSinceSpawn += dt;
             if (timeSinceSpawn > spawnInterval) {
                 timeSinceSpawn = 0.0f;
                 Pipe p;
-                p.x = 1.2f; // NDC coords (offscreen)
+                p.x = 1.2f;
                 p.width = pipeWidth;
                 p.gapSize = pipeGapSize;
                 float margin = 0.2f;
@@ -500,12 +488,10 @@ int main() {
             }
         }
 
-        // MOVE PIPES
         if (gameStarted && !gameOver) {
             for (auto& p : pipes) p.x -= pipeSpeed * dt;
         }
 
-        // SCORING
         for (auto& p : pipes) {
             if (!p.scored && p.x + p.width * 0.5f < birdX) {
                 p.scored = true;
@@ -516,26 +502,21 @@ int main() {
             }
         }
 
-        // Remove off-screen pipes
         while (!pipes.empty() && pipes.front().x + pipes.front().width < -1.5f) pipes.erase(pipes.begin());
 
-        // ---------- COLLISION ----------
         float aspect = (float)fbw / (float)fbh;
         for (auto& p : pipes) {
             float pl = p.x - p.width * 0.5f;
             float pr = p.x + p.width * 0.5f;
-            float gt = p.gapY + p.gapSize * 0.5f; // gap top
-            float gb = p.gapY - p.gapSize * 0.5f; // gap bottom
+            float gt = p.gapY + p.gapSize * 0.5f;
+            float gb = p.gapY - p.gapSize * 0.5f;
 
-            // Scale X coordinates by aspect for more accurate collision
             float scaledBirdLeft = (birdX - birdRadius) * aspect;
             float scaledBirdRight = (birdX + birdRadius) * aspect;
             float scaledPipeLeft = pl * aspect;
             float scaledPipeRight = pr * aspect;
 
             bool overlapsX = !(scaledBirdRight < scaledPipeLeft || scaledBirdLeft > scaledPipeRight);
-
-            // insideGap = bunny fully within vertical gap (using gt and gb)
             bool insideGap = (birdY + birdRadius < gt) && (birdY - birdRadius > gb);
 
             if (overlapsX && !insideGap) {
@@ -546,7 +527,6 @@ int main() {
             }
         }
 
-        // CLOUDS movement
         for (auto& c : clouds) {
             if (!gameOver) {
                 c.x_px -= c.speed * dt;
@@ -554,7 +534,6 @@ int main() {
             }
         }
 
-        // BUNNY ANIMATION
         if (!gameOver) {
             bunnyAnimTimer += dt;
             if (bunnyAnimTimer >= bunnyAnimDuration) {
@@ -563,15 +542,24 @@ int main() {
             }
         }
 
-        // RENDER
         glViewport(0, 0, fbw, fbh);
         glClearColor(0.53f, 0.81f, 0.92f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        // DRAW WORLD (clouds, pipes, bunny)
+        if (grassTex) {
+            const float grassOrigAspect = 940.0f / 788.0f;
+            float grassHeight = fbh * 0.12f;
+            float grassWidth = grassHeight * grassOrigAspect;
+            float grassY = fbh - grassHeight * 0.5f;
+            int numTiles = (int)ceilf((float)fbw / grassWidth) + 1;
+            for (int i = 0; i < numTiles; i++) {
+                float grassX = i * grassWidth + grassWidth * 0.5f;
+                drawTexPixel(grassTex, grassX, grassY, grassWidth, grassHeight, fbw, fbh, 1.0f);
+            }
+        }
+
         for (auto& c : clouds) drawTexPixel(c.tex, c.x_px + c.w_px * 0.5f, c.y_px + c.h_px * 0.5f, c.w_px, c.h_px, fbw, fbh, 0.95f);
 
-        // PIPES (color shader)
         glUseProgram(prog);
         glBindVertexArray(vao);
         const float pipeR = 0.45f, pipeG = 0.8f, pipeB = 0.45f;
@@ -597,7 +585,6 @@ int main() {
             glDrawArrays(GL_TRIANGLES, 0, 6);
         }
 
-        // Bunny (texture)
         glUseProgram(texProg);
         glBindVertexArray(vaoTex);
         GLuint currentBunnyTex = gameOver ? bunnyTexDied : (bunnyFrame == 0 ? bunnyTexIdle : bunnyTexFlap);
@@ -605,10 +592,7 @@ int main() {
         float bunny_px_y = ((1.0f - birdY) * 0.5f) * fbh;
         drawTexPixel(currentBunnyTex, bunny_px_x, bunny_px_y, 90, 90, fbw, fbh);
 
-        // UI (title/score/gameover) drawn before buttons
         drawScore(score, fbw, fbh, gameOver);
-
-        // Buttons drawn last so they appear on top
         drawButton(startBtn, fbw, fbh);
         drawButton(exitBtn, fbw, fbh);
         drawButton(resetBtn, fbw, fbh);
