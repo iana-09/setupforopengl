@@ -2,6 +2,7 @@
 // Hop Hop Bunny - Final Polish
 // Fixed: "Best Score" text is now responsive (scales with screen) and much larger.
 
+#include <windows.h>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <chrono>
@@ -12,6 +13,8 @@
 #include <vector>
 #include <cmath>
 #include <algorithm>
+#include <mmsystem.h>
+#pragma comment(lib, "winmm.lib")
 
 using Clock = std::chrono::high_resolution_clock;
 
@@ -113,6 +116,10 @@ int main() {
     if (!win) { std::cerr << "Window create failed\n"; glfwTerminate(); return -1; }
     glfwMakeContextCurrent(win);
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) { std::cerr << "GLAD init failed\n"; return -1; }
+
+    // Play lobby music (looping)
+    PlaySound(TEXT("lobby.wav"), nullptr, SND_FILENAME | SND_ASYNC | SND_LOOP);
+
 
     // Programs
     GLuint prog = linkProgram(vertexSrc, fragSrc);
@@ -437,6 +444,7 @@ int main() {
             else if (gameStarted && !gameOver) {
                 birdVel = +flapStrength;
                 firstFlapDone = true;
+                PlaySound(TEXT("hop.wav"), nullptr, SND_FILENAME | SND_ASYNC);
             }
             mouseJustPressed = false;
         }
@@ -444,6 +452,7 @@ int main() {
         if (gameStarted && !gameOver && spaceNow && !spacePrev) {
             birdVel = +flapStrength;
             firstFlapDone = true;
+            PlaySound(TEXT("hop.wav"), nullptr, SND_FILENAME | SND_ASYNC);
         }
         spacePrev = spaceNow;
 
